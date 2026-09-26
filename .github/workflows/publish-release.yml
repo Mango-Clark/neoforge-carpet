@@ -3,6 +3,12 @@ name: Publish Release
 on:
   push:
     branches: [1.20.1-tick]
+  workflow_dispatch:
+    inputs:
+      tick_version:
+        description: Tick release version (SemVer MAJOR.MINOR.PATCH)
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -20,10 +26,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check whether tick_version changed
+      - name: Select release version
         id: version
         env:
+          EVENT_NAME: ${{ github.event_name }}
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          INPUT_TICK_VERSION: ${{ inputs.tick_version }}
         run: bash .github/scripts/check-release-version.sh
 
       - name: Set up JDK 21
@@ -36,6 +44,8 @@ jobs:
 
       - name: Build and run GameTests
         if: steps.version.outputs.changed == 'true'
+        env:
+          ORG_GRADLE_PROJECT_tick_version: ${{ inputs.tick_version || '' }}
         run: |
           chmod +x gradlew
           ./gradlew build runGameTestServer --no-daemon
