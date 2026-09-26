@@ -1,8 +1,8 @@
 # neoforge-carpet-tick
 
-A small Minecraft 1.20.1 NeoForge mod that keeps Carpet's `/tick` command without Carpet rules, Scarpet, or the other Carpet commands.
+A small Minecraft 1.20.1 Forge mod that keeps Carpet's `/tick` command without Carpet rules, Scarpet, or the other Carpet commands.
 
-Requires NeoForge 47.1.106 or later in the 47.1.x line and Java 17. Install the JAR on the server. Operators with permission level 2 can use:
+Requires Forge 47.4.20 or later in the 47.4.x line and Java 17. Install the JAR on the server. Operators with permission level 2 can use:
 
 - `/tick rate [tps]` — view or set the server tick rate (0.1–500 TPS).
 - `/tick warp [ticks] [tail command]` — run ticks as quickly as possible; `/tick warp 0` interrupts a warp.
@@ -18,6 +18,8 @@ Tick control runs on the server; the mod does not change client animation timing
 Build with `./gradlew build` (or `.\gradlew.bat build` on Windows). The distributable is `build/libs/neoforge-carpet-1.4.112-tick-1.0.0.jar` at the current version.
 
 The version is `<carpet_version>-tick-<tick_version>`. `carpet_version=1.4.112` records the upstream Carpet base and stays fixed for this port. For subsequent releases, change only `tick_version` in `gradle.properties` using SemVer `MAJOR.MINOR.PATCH` (for example, `1.0.1`). The JAR name and mod metadata version are derived from those two properties.
+
+Pushing a `tick_version` change to `1.20.1-tick` runs the release workflow. After the build and GameTests pass, it creates tag `v<carpet_version>-tick-<tick_version>` and a GitHub Release containing the Forge JAR. A push that changes other properties without changing `tick_version` does not publish. The workflow uses the repository's `GITHUB_TOKEN` with `contents: write`; it does not upload to CurseForge or publish Maven artifacts. The first release requires an explicit version bump from `1.0.0`.
 
 ## Behavior and profiling
 

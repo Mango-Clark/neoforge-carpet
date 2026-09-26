@@ -5,9 +5,9 @@ Checked: 2026-09-26, current working tree (including the existing tick-only conv
 ## Scope and artifact
 
 - The main source set contains 14 Java files: four runtime classes, nine mixins/accessors, and one GameTest class. Only `src/tick/java`, `src/tick/resources`, and generated mod metadata feed the main source set.
-- The freshly built `build/libs/neoforge-carpet-1.4.112-tick-1.0.0.jar` is **27,786 bytes (27.13 KiB)** and contains 15 class files, including the two profiler nested classes. Size is an observation of this build, not a fixed budget.
+- The freshly built `build/libs/neoforge-carpet-1.4.112-tick-1.0.0.jar` is **27,784 bytes (27.13 KiB)** and contains 15 class files, including the two profiler nested classes. Size is an observation of this build, not a fixed budget.
 - JAR inspection found the mod metadata, mixin configuration, generated refmap, and pack metadata. No `TickGameTests.class`, original `carpet/` classes, Scarpet scripts/docs, client assets, or nested dependency JARs were present.
-- The build declares the Mixin processor as an annotation processor only. Runtime requires Minecraft and NeoForge; no additional library is bundled. This excludes the size of Minecraft, NeoForge, development caches, and the JVM.
+- The build declares the Mixin processor as an annotation processor only. Runtime requires Minecraft and Forge; no additional library is bundled. This excludes the size of Minecraft, Forge, development caches, and the JVM.
 
 ## Runtime inspection and changes
 
@@ -20,7 +20,7 @@ Checked: 2026-09-26, current working tree (including the existing tick-only conv
 
 ## Verification
 
-Executed `.\gradlew.bat build runGameTestServer --offline --console=plain` with Gradle 8.14.3 on Java 21, Minecraft 1.20.1 / NeoForge 47.1.106 on Java 17. Result: **BUILD SUCCESSFUL; all 2 required GameTests passed**.
+Executed `.\gradlew.bat build runGameTestServer --no-daemon --console=plain` with Gradle 8.14.3 on Java 21, Minecraft 1.20.1 / Forge 47.4.20 on Java 17. Result: **BUILD SUCCESSFUL; all 2 required GameTests passed**.
 
 - `commands`: registration and basic state transitions for rate, freeze, step, SuperHot, and warp start/interrupt.
 - `profilerCleanup`: timer creation during entity profiling, reset releasing the timer stack and requester, inactive completion avoiding timer access, and replacement clearing prior timers.
@@ -30,6 +30,6 @@ Executed `.\gradlew.bat build runGameTestServer --offline --console=plain` with 
 
 ## Follow-up findings
 
-The inherited `.github/workflows/publish-release.yml` still targets original Carpet release infrastructure: CurseForge project 349239 / Fabric metadata, Gradle `publish`, removed `mergedoc.sh`, and Carpet rule/wiki generation. It must be adapted to this project's intended publication targets before use. The local build does not validate that workflow. No release was published as part of this audit.
+The inherited `.github/workflows/publish-release.yml` was replaced with a `tick_version`-gated GitHub Release workflow. The old CurseForge/Fabric, Gradle `publish`, Scarpet documentation, and rule/wiki jobs were removed. Local build and GameTests do not validate GitHub-hosted token permissions or publication; no release was published as part of this audit.
 
 For a performance comparison, use the same JVM, world, player count, view/simulation distance, and mod set, with warmup and repeated runs. Compare normal 20 TPS with profiling disabled first, then measure freeze, warp, and active profiling separately. Record MSPT, allocations, and retained heap; JAR size alone cannot prove runtime speed.

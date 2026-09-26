@@ -13,9 +13,7 @@ base.archivesName = 'neoforge-carpet'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 legacyForge {
-    enable {
-        neoForgeVersion = "${minecraft_version}-${neo_version}"
-    }
+    version = "${minecraft_version}-${forge_version}"
     runs {
         client { client() }
         server {
@@ -47,8 +45,8 @@ dependencies {
 }
 
 tasks.register('generateModMetadata', ProcessResources) {
-    inputs.properties(mod_version: project.version.toString(), minecraft_version: minecraft_version, neo_version: neo_version)
-    expand(mod_version: project.version.toString(), minecraft_version: minecraft_version, neo_version: neo_version)
+    inputs.properties(mod_version: project.version.toString(), minecraft_version: minecraft_version, forge_version: forge_version)
+    expand(mod_version: project.version.toString(), minecraft_version: minecraft_version, forge_version: forge_version)
     from 'src/tick/templates'
     into 'build/generated/sources/modMetadata'
 }
