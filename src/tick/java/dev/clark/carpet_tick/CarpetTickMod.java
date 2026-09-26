@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod("neoforge_carpet_tick")
 public final class CarpetTickMod {
     public CarpetTickMod() {
+        dev.clark.carpet_tick.compat.CarpetConflictGuard.checkInstalled();
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(this::registerCommands);
         bus.addListener(this::serverStopped);

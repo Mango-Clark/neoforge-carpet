@@ -36,3 +36,7 @@ run/
 logs/
 /src/generated/
 /src/test/
+
+# Python maintenance scripts
+__pycache__/
+*.pyc

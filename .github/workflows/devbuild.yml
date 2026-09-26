@@ -21,7 +21,13 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build
+        run: |
+          python -m unittest discover -s .github/scripts -p 'test_*.py' -v
+          python .github/scripts/upstream.py check
+          ./gradlew build runGameTestServer
+          python .github/scripts/verify-gametests.py
+          python .github/scripts/verify-jar.py
+          python .github/scripts/test-conflict-startup.py
       - uses: actions/upload-artifact@v4
         with:
           name: Compiled artifacts for ${{ github.sha }}

@@ -1,5 +1,6 @@
 {
   "required": true,
+  "plugin": "dev.clark.carpet_tick.compat.CarpetConflictGuard",
   "minVersion": "0.8.5",
   "package": "dev.clark.carpet_tick.mixin",
   "refmap": "neoforge_carpet_tick.refmap.json",

@@ -1,0 +1,100 @@
+name: Track upstream versions
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    outputs:
+      release: ${{ steps.publish.outputs.release }}
+      ref: ${{ steps.publish.outputs.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 1.20.1-tick
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Create isolated candidate branch
+        run: |
+          git switch -c automation/upstream-candidate
+          echo "BASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Test updater
+        run: python -m unittest discover -s .github/scripts -p 'test_*.py' -v
+      - name: Detect version changes and prepare known ports
+        id: scan
+        continue-on-error: true
+        run: python .github/scripts/upstream.py scan
+      - uses: actions/setup-java@v4
+        if: steps.scan.outputs.release != ''
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Validate candidate runtime
+        id: validate
+        if: steps.scan.outputs.release != ''
+        continue-on-error: true
+        run: |
+          chmod +x gradlew
+          ./gradlew build runGameTestServer --no-daemon
+          python .github/scripts/verify-gametests.py
+          python .github/scripts/verify-jar.py
+          python .github/scripts/test-conflict-startup.py
+      - name: Finalize verified port
+        if: steps.scan.outputs.release != '' && steps.validate.outcome == 'success'
+        run: python .github/scripts/upstream.py finalize
+      - name: Discard failed runtime changes and record failure
+        if: steps.scan.outcome == 'failure' || (steps.scan.outputs.release != '' && steps.validate.outcome != 'success')
+        run: |
+          git restore -- src/tick gradle.properties CHANGELOG.md
+          python .github/scripts/upstream.py fail --reason 'Scan or validation failed; candidate runtime changes were discarded'
+      - name: Validate generated documentation
+        run: python .github/scripts/upstream.py check
+      - name: Commit and fast-forward target; select publication retry
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          remote=$(git ls-remote origin refs/heads/1.20.1-tick | cut -f1)
+          test "$remote" = "$BASE_SHA" || { echo '::error::Target advanced; retry against the new commit'; exit 1; }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/tick gradle.properties '*.md' .github/upstream-state.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore: synchronize upstream version status'
+            git push origin HEAD:refs/heads/1.20.1-tick
+          fi
+          python .github/scripts/select-pending-release.py
+      - name: Preserve command test and update evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-update-evidence
+          path: |
+            .github/upstream-state.json
+            run/logs/
+            build/reports/
+      - name: Report failed fetch or validation
+        if: steps.scan.outcome == 'failure' || steps.validate.outcome == 'failure'
+        run: exit 1
+  release:
+    needs: sync
+    if: needs.sync.outputs.release != ''
+    uses: ./.github/workflows/publish-release.yml
+    with:
+      tick_version: ${{ needs.sync.outputs.release }}
+      release_ref: ${{ needs.sync.outputs.ref }}
+    secrets: inherit

@@ -15,7 +15,11 @@ Requires Forge 47.4.20 or later in the 47.4.x line and Java 17. Install the JAR 
 Only `/tick` is registered by this mod. Vanilla and other mods' commands are unaffected.
 Tick control runs on the server; the mod does not change client animation timing.
 
-Build with `./gradlew build` (or `.\gradlew.bat build` on Windows). The distributable is `build/libs/neoforge-carpet-1.4.112-tick-1.0.0.jar` at the current version.
+Do not install alongside original/full Carpet (`carpet` mod ID). Startup stops with the conflicting mod's identity and an instruction to use the original Carpet mod and remove **neoforge-carpet-tick**.
+
+Upstream version tracking, reviewed automatic ports, failure handling and deployment requirements are described in [upstream maintenance](docs/upstream-maintenance.md). Documentation-only upstream updates never change this port's release version. Detected upstream versions below are separate from the fixed Carpet base and do not imply compatibility.
+
+Build with `./gradlew build` (or `.\gradlew.bat build` on Windows). The distributable is `build/libs/neoforge-carpet-<carpet_version>-tick-<tick_version>.jar`, using the values in `gradle.properties`.
 
 The version is `<carpet_version>-tick-<tick_version>`. `carpet_version=1.4.112` records the upstream Carpet base and stays fixed for this port. For subsequent releases, change only `tick_version` in `gradle.properties` using SemVer `MAJOR.MINOR.PATCH` (for example, `1.0.1`). The JAR name and mod metadata version are derived from those two properties.
 
@@ -34,3 +38,16 @@ Pushing a `tick_version` change to `1.20.1-tick` runs the release workflow. Afte
 Run `./gradlew build runGameTestServer` (Windows: `.\gradlew.bat build runGameTestServer`) for compilation, packaging, and the command/profiler regression tests. `build` alone does not run GameTests. Gradle uses a Java 17 compilation toolchain; this checkout was verified with Java 21 running Gradle and Java 17 running Minecraft.
 
 See [the lightweight audit](docs/lightweight-audit.md) for scope, evidence, remaining costs, and verification limits.
+
+<!-- upstream-status:start -->
+## Upstream tracking status
+
+Source: [chililisoup/neoforge-carpet](https://github.com/chililisoup/neoforge-carpet). Detected versions are not a compatibility claim.
+
+| Branch | Latest detected | Reviewed | Applied and verified | Status |
+| --- | --- | --- | --- | --- |
+| master | 1.4.147-port-1.0.8 (`44360a01d00b`) | Not verified | Not verified | informational-only |
+| 1.20.1 | 1.4.112-port-1.0.8 (`4b3f3ddc7312`) | Not verified | Not verified | baseline-review-required |
+
+Failure history: 2 distinct event(s). Details: `.github/upstream-state.json`; command test results: GitHub Actions artifacts.
+<!-- upstream-status:end -->

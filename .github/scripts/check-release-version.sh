@@ -23,11 +23,14 @@ fi
 
 if [[ "${EVENT_NAME:-push}" == 'workflow_dispatch' ]]; then
   selected_tick=${INPUT_TICK_VERSION:-}
-  if [[ ! "$selected_tick" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9]*)$ ]]; then
+  if [[ ! "$selected_tick" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
     echo '::error::Manual tick_version must use SemVer MAJOR.MINOR.PATCH.'
     exit 1
   fi
-  current_tick=$selected_tick
+  if [[ "$selected_tick" != "$current_tick" ]]; then
+    echo '::error::Manual version must match the checked-out gradle.properties; commit the version and changelog first.'
+    exit 1
+  fi
 else
   before=${GITHUB_EVENT_BEFORE:?GITHUB_EVENT_BEFORE is required}
   if [[ "$before" =~ ^0+$ ]]; then
@@ -54,10 +57,14 @@ else
     echo '::error::carpet_version must not change in a tick release.'
     exit 1
   fi
-  if [[ ! "$current_tick" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9]*)$ ]]; then
+  if [[ ! "$current_tick" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
     echo '::error::tick_version must use SemVer MAJOR.MINOR.PATCH.'
     exit 1
   fi
+  python - "$previous_tick" "$current_tick" <<'PY'
+import sys
+assert tuple(map(int, sys.argv[2].split('.'))) > tuple(map(int, sys.argv[1].split('.'))), 'Release version must increase'
+PY
 fi
 
 version="${current_carpet}-tick-${current_tick}"

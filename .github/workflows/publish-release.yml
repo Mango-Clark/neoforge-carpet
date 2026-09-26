@@ -1,6 +1,14 @@
 name: Publish Release
 
 on:
+  workflow_call:
+    inputs:
+      tick_version:
+        required: true
+        type: string
+      release_ref:
+        required: true
+        type: string
   push:
     branches: [1.20.1-tick]
   workflow_dispatch:
@@ -25,11 +33,12 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.release_ref || github.sha }}
 
       - name: Select release version
         id: version
         env:
-          EVENT_NAME: ${{ github.event_name }}
+          EVENT_NAME: ${{ inputs.tick_version != '' && 'workflow_dispatch' || github.event_name }}
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
           INPUT_TICK_VERSION: ${{ inputs.tick_version }}
         run: bash .github/scripts/check-release-version.sh
@@ -44,11 +53,14 @@ jobs:
 
       - name: Build and run GameTests
         if: steps.version.outputs.changed == 'true'
-        env:
-          ORG_GRADLE_PROJECT_tick_version: ${{ inputs.tick_version || '' }}
         run: |
           chmod +x gradlew
           ./gradlew build runGameTestServer --no-daemon
+          python .github/scripts/verify-gametests.py
+          python .github/scripts/verify-jar.py
+          python .github/scripts/test-conflict-startup.py
+          python -m unittest discover -s .github/scripts -p 'test_*.py' -v
+          python .github/scripts/upstream.py check
 
       - name: Verify release JAR
         if: steps.version.outputs.changed == 'true'
@@ -71,13 +83,14 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
           set -euo pipefail
+          release_sha=$(git rev-parse HEAD)
           remote_sha=$(git ls-remote --tags origin "refs/tags/${TAG}" | cut -f1)
-          if [[ -n "$remote_sha" && "$remote_sha" != "$GITHUB_SHA" ]]; then
+          if [[ -n "$remote_sha" && "$remote_sha" != "$release_sha" ]]; then
             echo "::error::${TAG} already points to another commit"
             exit 1
           fi
           if [[ -z "$remote_sha" ]]; then
-            git tag "$TAG" "$GITHUB_SHA"
+            git tag "$TAG" "$release_sha"
             git push origin "refs/tags/${TAG}"
           fi
 
@@ -89,9 +102,21 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          if gh release view "$TAG" --json tagName >/dev/null 2>&1; then
+          if gh release view "$TAG" --json isDraft --jq '.isDraft' > build/release-draft.txt; then
+            if [[ "$(cat build/release-draft.txt)" == 'true' ]]; then
+              gh release upload "$TAG" "build/libs/neoforge-carpet-${VERSION}.jar" --clobber
+              gh release edit "$TAG" --draft=false
+            fi
             echo "${TAG} is already published"
             exit 0
           fi
           gh release create "$TAG" "build/libs/neoforge-carpet-${VERSION}.jar" \
             --verify-tag --title "$TAG" --generate-notes
+      - name: Preserve release verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-verification
+          path: |
+            run/logs/
+            build/reports/

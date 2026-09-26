@@ -1,6 +1,16 @@
 # Lightweight audit
 
-Checked: 2026-09-26, current working tree (including the existing tick-only conversion).
+Prior footprint checked: 2026-09-26, before the conflict guard and upstream automation additions. The original measurements below are retained as historical evidence.
+
+## Update verification: conflict guard and upstream automation
+
+- The 2026-09-26 build of `neoforge-carpet-1.4.112-tick-1.0.0.jar` after adding the conflict guard is **30,922 bytes (30.20 KiB)**, with 16 packaged classes and 15 Java sources including the excluded GameTest source. The new plugin runs at loading time, not on the tick hot path.
+- `build runGameTestServer --offline --no-daemon --console=plain` passed on Java 21 / Java 17 with **3 required GameTests**. Expanded command checks cover deep freeze, step budget, player activation under SuperHot, and health/entities command execution, in addition to the prior checks.
+- A temporary low-code Forge mod declaring ID `carpet` was discovered by the real development loader. Startup failed before the GameTest server started and named the conflict with original-mod/removal advice. The test fixture was removed automatically. This verifies the discovered-ID guard, not every original-mod version or production-obfuscated combination.
+- Ordinary plugin exceptions can be swallowed during Mixin selection; the plugin now propagates a fatal Mixin initialization error. Some Forge loading failures otherwise return zero, so CI requires positive `All ... required tests passed` evidence as well as process success.
+- **25 Python/real Bash automation tests passed**, covering version gating, no-change updates, exact conversion rules, stale/unknown rules, indirect dependency changes, source failures, document consistency, publication retries, and successful GameTest evidence. GitHub workflow syntax/expressions passed actionlint (external shellcheck/pyflakes disabled).
+- JAR verification found the guard and refmap, matching metadata version, and no development GameTest or legacy Carpet classes. CI retains normal-test evidence before the expected failing conflict launch overwrites the latest log.
+- Hosted scheduling, bot permissions and actual GitHub publication were not exercised. The first detected upstream baseline remains unapproved; no automatic port is claimed as applied. No release version was changed by this implementation.
 
 ## Scope and artifact
 
@@ -33,3 +43,16 @@ Executed `.\gradlew.bat build runGameTestServer --no-daemon --console=plain` wit
 The inherited `.github/workflows/publish-release.yml` was replaced with a `tick_version`-gated GitHub Release workflow. The old CurseForge/Fabric, Gradle `publish`, Scarpet documentation, and rule/wiki jobs were removed. Local build and GameTests do not validate GitHub-hosted token permissions or publication; no release was published as part of this audit.
 
 For a performance comparison, use the same JVM, world, player count, view/simulation distance, and mod set, with warmup and repeated runs. Compare normal 20 TPS with profiling disabled first, then measure freeze, warp, and active profiling separately. Record MSPT, allocations, and retained heap; JAR size alone cannot prove runtime speed.
+
+<!-- upstream-status:start -->
+## Upstream tracking status
+
+Source: [chililisoup/neoforge-carpet](https://github.com/chililisoup/neoforge-carpet). Detected versions are not a compatibility claim.
+
+| Branch | Latest detected | Reviewed | Applied and verified | Status |
+| --- | --- | --- | --- | --- |
+| master | 1.4.147-port-1.0.8 (`44360a01d00b`) | Not verified | Not verified | informational-only |
+| 1.20.1 | 1.4.112-port-1.0.8 (`4b3f3ddc7312`) | Not verified | Not verified | baseline-review-required |
+
+Failure history: 2 distinct event(s). Details: `.github/upstream-state.json`; command test results: GitHub Actions artifacts.
+<!-- upstream-status:end -->
