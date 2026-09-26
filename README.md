@@ -1,26 +1,34 @@
-<p align="center"><img src="./src/main/resources/assets/carpet/icon.png" width="128px" alt="Carpet: NeoForged" /></p>
+# neoforge-carpet-tick
 
-<h1 align="center">Carpet: NeoForged</h1>
+A small Minecraft 1.20.1 NeoForge mod that keeps Carpet's `/tick` command without Carpet rules, Scarpet, or the other Carpet commands.
 
-Fork of gnembon's [Carpet Mod](https://github.com/gnembon/fabric-carpet) ported to NeoForge
+Requires NeoForge 47.1.106 or later in the 47.1.x line and Java 17. Install the JAR on the server. Operators with permission level 2 can use:
 
-<p align="center">
- <a href="https://modrinth.com/mod/neoforge-carpet"><img src="https://img.shields.io/badge/Modrinth-00AF5C?style=for-the-badge&logo=modrinth&labelColor=16181C" alt="Modrinth downloads"></a>
- <a href="https://curseforge.com/minecraft/mc-mods/carpet-neoforged"><img src="https://img.shields.io/badge/CurseForge-F16436?style=for-the-badge&logo=curseforge&labelColor=0D0D0D" alt="CurseForge downloads"></a>
-</p>
+- `/tick rate [tps]` — view or set the server tick rate (0.1–500 TPS).
+- `/tick warp [ticks] [tail command]` — run ticks as quickly as possible; `/tick warp 0` interrupts a warp.
+- `/tick freeze [on|off|deep|status]` — freeze or resume game simulation.
+- `/tick step [ticks]` — advance a frozen game by 1–72,000 ticks.
+- `/tick superHot` — toggle simulation only while players are active.
+- `/tick health [ticks]` — sample server tick time.
+- `/tick entities [ticks]` — sample entity and block entity tick cost.
 
-<hr>
+Only `/tick` is registered by this mod. Vanilla and other mods' commands are unaffected.
+Tick control runs on the server; the mod does not change client animation timing.
 
-Everything should work the same as with Fabric Carpet, bringing plenty of configurable vanilla tweaks such as:
- - Movable block entities
- - Stackable Shulkers boxes
- - the Scarpet scripting language
- - ...and everything else from the original mod
+Build with `./gradlew build` (or `.\gradlew.bat build` on Windows). The distributable is `build/libs/neoforge-carpet-1.4.112-tick-1.0.0.jar` at the current version.
 
-All of which is only required server-side.
+The version is `<carpet_version>-tick-<tick_version>`. `carpet_version=1.4.112` records the upstream Carpet base and stays fixed for this port. For subsequent releases, change only `tick_version` in `gradle.properties` using SemVer `MAJOR.MINOR.PATCH` (for example, `1.0.1`). The JAR name and mod metadata version are derived from those two properties.
 
-<hr>
+## Behavior and profiling
 
-<h2>Compatibility</h2>
+- Freeze pauses world time, weather, scheduled ticks, block events, raids, command functions, non-player entities, and block entities. Players and network processing continue. Deep freeze also pauses stale chunk ticket expiry.
+- Step requires freeze. SuperHot responds to player movement and input; it does not accelerate the server.
+- Health and entities default to 100 ticks and accept 20–24,000 ticks. Starting a new profile replaces the current profile.
+- Health reports average, minimum, and maximum time inside the server tick; waiting between ticks is excluded. Entities additionally reports the ten entity/block entity types with the highest total sampled time, combined across dimensions. It is not the full Carpet section profiler.
+- Profiling runs only when requested. Its state is cleared on replacement, completion, and server shutdown. Tick settings are in memory and reset on server restart.
 
-A few Carpet extension mods will work when using [Sinytra Connector](https://github.com/Sinytra/Connector), namely less mixin-heavy ones (most scarpet extensions should work fine).
+## Verification and footprint
+
+Run `./gradlew build runGameTestServer` (Windows: `.\gradlew.bat build runGameTestServer`) for compilation, packaging, and the command/profiler regression tests. `build` alone does not run GameTests. Gradle uses a Java 17 compilation toolchain; this checkout was verified with Java 21 running Gradle and Java 17 running Minecraft.
+
+See [the lightweight audit](docs/lightweight-audit.md) for scope, evidence, remaining costs, and verification limits.

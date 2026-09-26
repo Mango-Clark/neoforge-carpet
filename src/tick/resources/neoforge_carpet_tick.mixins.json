@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "dev.clark.carpet_tick.mixin",
+  "refmap": "neoforge_carpet_tick.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MinecraftServerMixin",
+    "ServerLevelMixin",
+    "LevelMixin",
+    "BlockEntityMixin",
+    "ServerChunkCacheMixin",
+    "ChunkMapAccessor",
+    "DistanceManagerAccessor",
+    "ServerFunctionManagerMixin",
+    "ServerGamePacketListenerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
