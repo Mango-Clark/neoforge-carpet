@@ -1,8 +1,8 @@
 # neoforge-carpet-tick
 
-A small Minecraft 1.20.1 Forge mod that keeps Carpet's `/tick` command without Carpet rules, Scarpet, or the other Carpet commands.
+A small Minecraft 1.20.1 Forge/NeoForge mod that keeps Carpet's `/tick` command without Carpet rules, Scarpet, or the other Carpet commands.
 
-Requires Forge 47.4.0 or later in the 47.4.x line and Java 17. Builds compile against Forge 47.4.0 as the minimum compatibility baseline. Install the JAR on the server. Operators with permission level 2 can use:
+Requires Java 17 and either Forge 47.4.0 or later in the 47.4.x line, or a published NeoForge 47.1.x version (47.1.5 onward). The same JAR works on both loaders. The shared `forge` dependency uses `[47.1.5,47.2),[47.4.0,47.5)`; Forge 47.1.5 and later 47.1.x also satisfy that metadata, but the tested Forge targets are 47.4.x. Forge 47.2.x/47.3.x are not included. Install the JAR on the server. Operators with permission level 2 can use:
 
 - `/tick rate [tps]` — view or set the server tick rate (0.1–500 TPS).
 - `/tick warp [ticks] [tail command]` — run ticks as quickly as possible; `/tick warp 0` interrupts a warp.
@@ -21,9 +21,11 @@ Upstream version tracking, reviewed automatic ports, failure handling and deploy
 
 Build with `./gradlew build` (or `.\gradlew.bat build` on Windows). The distributable is `build/libs/neoforge-carpet-<carpet_version>-tick-<tick_version>.jar`, using the values in `gradle.properties`.
 
+The default build compiles against Forge 47.4.0. Use `-Ptick_loader=neoforge` to develop against NeoForge 47.1.106, or override its version with `-Pneoforge_version=47.1.5`. Both profiles produce the same artifact name and dependency metadata; do not install two copies of the mod.
+
 The version is `<carpet_version>-tick-<tick_version>`. `carpet_version=1.4.112` records the upstream Carpet base and stays fixed for this port. For subsequent releases, change only `tick_version` in `gradle.properties` using SemVer `MAJOR.MINOR.PATCH` (for example, `1.0.1`). The JAR name and mod metadata version are derived from those two properties.
 
-Pushing a `tick_version` change to `1.20.1-tick` runs the release workflow. After the build and GameTests pass, it creates tag `v<carpet_version>-tick-<tick_version>` and a GitHub Release containing the Forge JAR. A push that changes other properties without changing `tick_version` does not publish. The workflow uses the repository's `GITHUB_TOKEN` with `contents: write`; it does not upload to CurseForge or publish Maven artifacts. The first release requires an explicit version bump from `1.0.0`.
+Pushing a `tick_version` change to `1.20.1-tick` runs the release workflow. After the compatibility matrix passes, it creates tag `v<carpet_version>-tick-<tick_version>` and a GitHub Release containing the common Forge/NeoForge JAR. A push that changes other properties without changing `tick_version` does not publish. The workflow uses the repository's `GITHUB_TOKEN` with `contents: write`; it does not upload to CurseForge or publish Maven artifacts. The first release requires an explicit version bump from `1.0.0`.
 
 ## Behavior and profiling
 
@@ -35,7 +37,7 @@ Pushing a `tick_version` change to `1.20.1-tick` runs the release workflow. Afte
 
 ## Verification and footprint
 
-Run `./gradlew build runGameTestServer` (Windows: `.\gradlew.bat build runGameTestServer`) for compilation, packaging, and the command/profiler regression tests. `build` alone does not run GameTests. Gradle uses a Java 17 compilation toolchain; this checkout was verified with Java 21 running Gradle and Java 17 running Minecraft.
+Run `python .github/scripts/verify-compatibility.py` for builds, GameTests, positive log checks, packaging, identical uncompressed common JAR contents, and Carpet conflict startup rejection on Forge 47.4.0/47.4.20 and NeoForge 47.1.5/47.1.106. Evidence is retained per target under `build/reports/compatibility`. Release and automatic port validation require all four targets to pass. Individual development checks use `./gradlew build runGameTestServer` (Windows: `.\gradlew.bat build runGameTestServer`), immediately followed by `python .github/scripts/verify-gametests.py`. `build` alone does not run GameTests. Gradle uses a Java 17 compilation toolchain.
 
 See [the lightweight audit](docs/lightweight-audit.md) for scope, evidence, remaining costs, and verification limits.
 

@@ -48,10 +48,7 @@ jobs:
         continue-on-error: true
         run: |
           chmod +x gradlew
-          ./gradlew build runGameTestServer --no-daemon
-          python .github/scripts/verify-gametests.py
-          python .github/scripts/verify-jar.py
-          python .github/scripts/test-conflict-startup.py
+          python .github/scripts/verify-compatibility.py
       - name: Finalize verified port
         if: steps.scan.outputs.release != '' && steps.validate.outcome == 'success'
         run: python .github/scripts/upstream.py finalize

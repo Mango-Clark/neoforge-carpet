@@ -55,10 +55,7 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: |
           chmod +x gradlew
-          ./gradlew build runGameTestServer --no-daemon
-          python .github/scripts/verify-gametests.py
-          python .github/scripts/verify-jar.py
-          python .github/scripts/test-conflict-startup.py
+          python .github/scripts/verify-compatibility.py
           python -m unittest discover -s .github/scripts -p 'test_*.py' -v
           python .github/scripts/upstream.py check
 

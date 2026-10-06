@@ -2,6 +2,15 @@
 
 Prior footprint checked: 2026-09-26, before the conflict guard and upstream automation additions. The original measurements below are retained as historical evidence.
 
+## Common Forge/NeoForge JAR verification: 2026-10-06
+
+- Version `1.4.112-tick-1.1.0` produces one `build/libs/neoforge-carpet-1.4.112-tick-1.1.0.jar`, **30,935 bytes**, with the shared `forge` dependency range `[47.1.5,47.2),[47.4.0,47.5)`. Forge 47.4.20 is accepted alongside published NeoForge 47.1.x. Because both loaders declare ID `forge`, Forge 47.1.5+ within 47.1.x also satisfies this metadata, without a tested-support claim for that Forge line.
+- `python .github/scripts/verify-compatibility.py` passed on Java 21 running Gradle and Java 17 running Minecraft. Forge **47.4.0 and 47.4.20** and NeoForge **47.1.5 and 47.1.106** each passed **3 required GameTests**, positive log verification, packaging inspection, and real discovery rejection of the temporary `carpet` fixture before GameTest server startup.
+- Every uncompressed JAR entry, including bytecode, refmap and metadata, has identical content across all four builds. The final artifact is the canonical Forge 47.4.0 build; no loader-specific JAR is required. Logs and per-target success records are retained under `build/reports/compatibility`.
+- The initial NeoForge development loader uses the FML version in its JAR filename lookup. The development profile supplies a byte-identical filename alias only for FML 47.1.37, preserving the actual NeoForge version and production metadata. Matrix tests use separate `build/compatibility-runs` directories to isolate loader configuration and worlds.
+- **29 Python/real Bash automation tests passed**, including rejection of NeoForge-only, Forge-only and overly broad dependency ranges. Release and automatic port validation now require the four-target compatibility matrix.
+- These are development GameTest launches and binary-content comparisons; production-obfuscated installed-server startup, every intermediate NeoForge release, and multiplayer/client combinations were not individually exercised. Historical measurements and earlier verification limits below remain applicable.
+
 ## Forge compatibility update: 2026-10-06
 
 - Version `1.4.112-tick-1.0.1` uses Forge 47.4.0 as the compilation baseline and accepts Forge versions in `[47.4.0,47.5)`. The expected artifact is `build/libs/neoforge-carpet-1.4.112-tick-1.0.1.jar`.

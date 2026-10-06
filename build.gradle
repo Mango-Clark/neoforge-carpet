@@ -12,8 +12,17 @@ base.archivesName = 'neoforge-carpet'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+def tickLoader = providers.gradleProperty('tick_loader').getOrElse('forge')
+if (!(tickLoader in ['forge', 'neoforge'])) {
+    throw new GradleException('tick_loader must be forge or neoforge')
+}
+
 legacyForge {
-    version = "${minecraft_version}-${forge_version}"
+    if (tickLoader == 'neoforge') {
+        enable { neoForgeVersion = "${minecraft_version}-${neoforge_version}" }
+    } else {
+        version = "${minecraft_version}-${forge_version}"
+    }
     runs {
         client { client() }
         server {
@@ -23,11 +32,37 @@ legacyForge {
         gameTestServer {
             type = 'gameTestServer'
             systemProperty 'forge.enabledGameTestNamespaces', 'minecraft'
+            if (providers.gradleProperty('tick_test_run_dir').isPresent()) {
+                gameDirectory = layout.projectDirectory.dir(providers.gradleProperty('tick_test_run_dir').get())
+            }
         }
     }
     mods {
         neoforge_carpet_tick {
             sourceSet(sourceSets.main)
+        }
+    }
+}
+
+// The first NeoForge releases retain an FML 47.1.37 userdev handler that
+// searches for the FML version in the Forge JAR filename, not the NeoForge
+// version. Alias only that development classpath entry; preserve its bytes
+// and the actual --fml.forgeVersion. Production metadata is unaffected.
+if (tickLoader == 'neoforge') {
+    tasks.matching { it.name.startsWith('write') && it.name.endsWith('LegacyClasspath') }.configureEach {
+        def aliasDirectory = layout.buildDirectory.dir("legacy-neoforge-classpath/${name}")
+        outputs.dir(aliasDirectory)
+        doLast {
+            def classpathFile = outputs.files.files.find { it.name.endsWith('LegacyClasspath.txt') }
+            def entries = classpathFile.readLines('UTF-8')
+            if (entries.any { it.replace('\\', '/').contains('/net.neoforged.fancymodloader/loader/47.1.37/') }) {
+                def original = entries.find { new File(it).name == "forge-${minecraft_version}-${neoforge_version}.jar" }
+                if (original == null) throw new GradleException('Missing early NeoForge development artifact')
+                def alias = new File(aliasDirectory.get().asFile, "forge-${minecraft_version}-47.1.37.jar")
+                alias.parentFile.mkdirs()
+                java.nio.file.Files.copy(new File(original).toPath(), alias.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                classpathFile.setText(entries.collect { it == original ? alias.absolutePath : it }.join('\n') + '\n', 'UTF-8')
+            }
         }
     }
 }

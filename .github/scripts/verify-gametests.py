@@ -1,6 +1,7 @@
 """Forge may exit zero after a loading failure; require positive GameTest evidence."""
 from pathlib import Path
 import re
+import sys
 
 
 def verify(text):
@@ -13,7 +14,8 @@ def verify(text):
 
 
 if __name__ == '__main__':
-    count = verify(Path('run/logs/latest.log').read_text(encoding='utf-8'))
+    log = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('run/logs/latest.log')
+    count = verify(log.read_text(encoding='utf-8'))
     Path('build/reports').mkdir(parents=True, exist_ok=True)
-    Path('build/reports/gametest-success.log').write_text(Path('run/logs/latest.log').read_text(encoding='utf-8'), encoding='utf-8')
+    Path('build/reports/gametest-success.log').write_text(log.read_text(encoding='utf-8'), encoding='utf-8')
     print(str(count) + ' required GameTests passed (positive log evidence)')

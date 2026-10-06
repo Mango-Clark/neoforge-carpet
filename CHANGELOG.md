@@ -9,6 +9,7 @@ The tick-port release counter uses Semantic Versioning in the `tick_version` fie
 
 ### Added
 
+- Provide one Minecraft 1.20.1 JAR for Forge 47.4.x and all published NeoForge 47.1.x versions (47.1.5 onward), with development profiles and compatibility checks for both loaders.
 - Refuse startup alongside original/full Carpet mods and instruct users to keep the original mod and remove neoforge-carpet-tick.
 - Track upstream master and 1.20.1 version changes daily, synchronize documentation, and validate explicitly reviewed port rules before automatic releases. Unknown changes require review; documentation-only updates never change the release version.
 
@@ -17,10 +18,11 @@ The tick-port release counter uses Semantic Versioning in the `tick_version` fie
 ### Changed
 
 - Package the Minecraft 1.20.1 Forge `/tick` implementation as a lightweight server-side mod with version `1.4.112-tick-1.0.0` and artifact name `neoforge-carpet-1.4.112-tick-1.0.0.jar`.
-- **Breaking:** Target Minecraft Forge 47.4.0 and later 47.4.x releases instead of NeoForge 47.1.x; servers must use Forge to load this mod.
+- Support Minecraft Forge 47.4.0 and later 47.4.x releases alongside NeoForge 47.1.x.
 
 ### Fixed
 
+- Preserve Forge 47.4.x acceptance when adding NeoForge support; the shared `forge` dependency allows `[47.1.5,47.2),[47.4.0,47.5)` rather than a NeoForge-only range.
 - Allow Forge 47.4.0–47.4.19 to load the mod by lowering the minimum dependency version from 47.4.20 to 47.4.0. Compile against Forge 47.4.0 as the compatibility baseline.
 
 ### Removed

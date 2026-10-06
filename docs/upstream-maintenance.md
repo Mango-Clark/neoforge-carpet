@@ -20,7 +20,7 @@ Exact fingerprints prevent applying a rule to a different version or locally mod
 
 ## Validation and publication
 
-Candidates run updater tests, build, GameTests and JAR checks before the target branch is advanced. Failed code candidates are discarded; the failure is retained in state and documentation. Fetch failures keep the last detected versions. Identical failures are deduplicated. A branch race or push permission failure is visible in the failed workflow and uploaded evidence, since the bot may be unable to commit that failure.
+Candidates run updater tests and the common-JAR compatibility matrix before the target branch is advanced. Forge 47.4.0/47.4.20 and NeoForge 47.1.5/47.1.106 must pass build, GameTests, packaging/content equality and conflict rejection. Failed code candidates are discarded; the failure is retained in state and documentation. Fetch failures keep the last detected versions. Identical failures are deduplicated. A branch race or push permission failure is visible in the failed workflow and uploaded evidence, since the bot may be unable to commit that failure.
 
 The reusable release workflow explicitly publishes the verified commit after a successful automated update. It builds again, checks packaged metadata/classes, keeps tags immutable and retries an unpublished automatic version on later runs. An existing tag is reused for publication retries. Documentation-only changes do not initiate a new release. Manual release versions must match committed properties.
 
@@ -35,10 +35,7 @@ Verified original/full ports share the ID `carpet`. A mixin plugin checks the di
 ```text
 python -m unittest discover -s .github/scripts -p "test_*.py" -v
 python .github/scripts/upstream.py check
-.\gradlew.bat build runGameTestServer
-python .github/scripts/verify-gametests.py
-python .github/scripts/verify-jar.py
-python .github/scripts/test-conflict-startup.py
+python .github/scripts/verify-compatibility.py
 ```
 
 Do not change `run/eula.txt`. GameTests use the vanilla template namespace and require no normal-server EULA edit.
