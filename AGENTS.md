@@ -1,12 +1,12 @@
 # Project instructions
 
-This branch (`1.20.1-tick`) is a lightweight Minecraft 1.20.1 Forge 47.4.x port of Carpet's `/tick` command, targeting Forge 47.4.20. Preserve the tick-only scope: the mod registers `/tick` only; do not restore Carpet rules, Scarpet, other Carpet commands, or client-side features without an explicit request. Mod ID is `neoforge_carpet_tick` and the display/project name is `neoforge-carpet-tick`.
+This branch (`1.20.1-tick`) is a lightweight Minecraft 1.20.1 Forge 47.4.x port of Carpet's `/tick` command, supporting Forge 47.4.0 and later 47.4.x releases and compiling against the minimum Forge 47.4.0 baseline. Preserve the tick-only scope: the mod registers `/tick` only; do not restore Carpet rules, Scarpet, other Carpet commands, or client-side features without an explicit request. Mod ID is `neoforge_carpet_tick` and the display/project name is `neoforge-carpet-tick`.
 
 ## Versioning
 
 - `gradle.properties` is the version source. Keep `carpet_version=1.4.112` fixed: it is the upstream Carpet base version, not the release counter for this port.
 - Change only `tick_version` for subsequent releases. Use SemVer `MAJOR.MINOR.PATCH` without leading zeroes; increment it according to compatibility (patch for compatible fixes, minor for compatible features, major for incompatible changes).
-- Gradle derives mod version `<carpet_version>-tick-<tick_version>` and artifact name `neoforge-carpet-<carpet_version>-tick-<tick_version>.jar`. Current values yield `1.4.112-tick-1.0.0` and `neoforge-carpet-1.4.112-tick-1.0.0.jar`. Keep generated `mods.toml` version and JAR version aligned; do not put the Minecraft version in the artifact name.
+- Gradle derives mod version `<carpet_version>-tick-<tick_version>` and artifact name `neoforge-carpet-<carpet_version>-tick-<tick_version>.jar`. Current values yield `1.4.112-tick-1.0.1` and `neoforge-carpet-1.4.112-tick-1.0.1.jar`. Keep generated `mods.toml` version and JAR version aligned; do not put the Minecraft version in the artifact name.
 - A push to `1.20.1-tick` publishes a GitHub Release only when `tick_version` changes relative to the previous push commit. Do not bump it for ordinary build or documentation changes. Use a new version for every release; existing tags must not be moved. Update `CHANGELOG.md` with notable changes before bumping the version.
 
 ## Layout and checks
@@ -21,7 +21,7 @@ This branch (`1.20.1-tick`) is a lightweight Minecraft 1.20.1 Forge 47.4.x port 
 ## Upstream automation decisions
 
 - Track only `chililisoup/neoforge-carpet`: `master` for information, `1.20.1` for automatic ports. Poll daily at 03:17 UTC and support manual workflow dispatch. Process only changes to upstream `carpet_version` or `port_version`; same-version commits wait until the next version change. Do not follow Fabric Carpet separately.
-- Keep Minecraft 1.20.1, Forge 47.4.20/47.4.x, the tick-only scope, mod identity, fixed upstream base `carpet_version=1.4.112`, and artifact naming unchanged. Latest detected upstream versions are separate tracking data, never a replacement for the fixed base.
+- Keep Minecraft 1.20.1, the Forge 47.4.0 minimum/47.4.x support range, the tick-only scope, mod identity, fixed upstream base `carpet_version=1.4.112`, and artifact naming unchanged. Latest detected upstream versions are separate tracking data, never a replacement for the fixed base.
 - `.github/upstream-state.json` is the tracking source of truth: detected, reviewed, and applied/verified snapshots are distinct. The initial snapshot is NOT automatically verified. After manually comparing the port and passing tests, approve its exact SHA with `python .github/scripts/upstream.py approve-baseline --sha <SHA>`.
 - Assess the full upstream source/resource/build dependency closure conservatively, not only filenames containing tick. Documentation/CI-only changes and the two version properties are excluded; unknown source changes require review.
 - Automatic code changes require an explicitly reviewed rule in `.github/upstream-rules.json`: exact old/new commits and source fingerprints, exact local implementation fingerprint, runtime file before/after hashes, replacement content, SemVer classification, and changelog summary. No AI service, upstream build execution, arbitrary patch commands, or guessed transformations. An empty rule registry intentionally blocks unknown ports.

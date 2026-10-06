@@ -13,7 +13,7 @@ displayTest="IGNORE_SERVER_VERSION"
 [[dependencies.neoforge_carpet_tick]]
 modId="forge"
 mandatory=true
-versionRange="[47.4.20,47.5)"
+versionRange="[47.4.0,47.5)"
 ordering="NONE"
 side="BOTH"
 

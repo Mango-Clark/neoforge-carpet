@@ -2,6 +2,12 @@
 
 Prior footprint checked: 2026-09-26, before the conflict guard and upstream automation additions. The original measurements below are retained as historical evidence.
 
+## Forge compatibility update: 2026-10-06
+
+- Version `1.4.112-tick-1.0.1` uses Forge 47.4.0 as the compilation baseline and accepts Forge versions in `[47.4.0,47.5)`. The expected artifact is `build/libs/neoforge-carpet-1.4.112-tick-1.0.1.jar`.
+- `.\gradlew.bat assemble --no-daemon --console=plain` completed successfully against Forge 47.4.0. The generated JAR is **30,920 bytes**; packaging inspection confirmed the version and Forge dependency range, conflict guard and refmap, and exclusion of development GameTests and legacy `carpet/` classes.
+- GameTests and conflict startup tests were not run for this update. The historical Forge 47.4.20 results below do not establish runtime verification on Forge 47.4.0.
+
 ## Update verification: conflict guard and upstream automation
 
 - The 2026-09-26 build of `neoforge-carpet-1.4.112-tick-1.0.0.jar` after adding the conflict guard is **30,922 bytes (30.20 KiB)**, with 16 packaged classes and 15 Java sources including the excluded GameTest source. The new plugin runs at loading time, not on the tick hot path.

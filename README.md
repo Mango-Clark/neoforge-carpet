@@ -2,7 +2,7 @@
 
 A small Minecraft 1.20.1 Forge mod that keeps Carpet's `/tick` command without Carpet rules, Scarpet, or the other Carpet commands.
 
-Requires Forge 47.4.20 or later in the 47.4.x line and Java 17. Install the JAR on the server. Operators with permission level 2 can use:
+Requires Forge 47.4.0 or later in the 47.4.x line and Java 17. Builds compile against Forge 47.4.0 as the minimum compatibility baseline. Install the JAR on the server. Operators with permission level 2 can use:
 
 - `/tick rate [tps]` — view or set the server tick rate (0.1–500 TPS).
 - `/tick warp [ticks] [tail command]` — run ticks as quickly as possible; `/tick warp 0` interrupts a warp.

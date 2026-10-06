@@ -17,7 +17,11 @@ The tick-port release counter uses Semantic Versioning in the `tick_version` fie
 ### Changed
 
 - Package the Minecraft 1.20.1 Forge `/tick` implementation as a lightweight server-side mod with version `1.4.112-tick-1.0.0` and artifact name `neoforge-carpet-1.4.112-tick-1.0.0.jar`.
-- **Breaking:** Target Minecraft Forge 47.4.20 and later 47.4.x releases instead of NeoForge 47.1.x; servers must use Forge to load this mod.
+- **Breaking:** Target Minecraft Forge 47.4.0 and later 47.4.x releases instead of NeoForge 47.1.x; servers must use Forge to load this mod.
+
+### Fixed
+
+- Allow Forge 47.4.0–47.4.19 to load the mod by lowering the minimum dependency version from 47.4.20 to 47.4.0. Compile against Forge 47.4.0 as the compatibility baseline.
 
 ### Removed
 
